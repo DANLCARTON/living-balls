@@ -32,10 +32,16 @@ scene.add(camera)
 // ACTUAL CODE
 // ----------------------------------------------------------------
 
-const shape = new THREE.BoxGeometry(1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-const mesh = new THREE.Mesh(shape, material)
-scene.add(mesh)
+// const shape = new THREE.BoxGeometry(1, 1)
+// const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+// const mesh = new THREE.Mesh(shape, material)
+// scene.add(mesh)
+
+const plane = new THREE.PlaneGeometry(10, 10)
+const groundMaterial = new THREE.MeshPhongMaterial({color: 0x444444})
+const ground = new THREE.Mesh(plane, groundMaterial)
+ground.rotation.x = -Math.PI/2
+scene.add(ground)
 
 // ----------------------------------------------------------------
 

@@ -16,11 +16,18 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 // lumières
-scene.add(new THREE.AmbientLight(0xd2b48c, 5))
-const point1 = new THREE.PointLight(0xffffff, 100)
-point1.position.set(5, 5, 5)
+
+function getRandomColor() {
+    return Math.random() * 0xffffff;
+}
+
+scene.add(new THREE.AmbientLight(0xd2b48c, .1))
+
+const point1 = new THREE.PointLight(getRandomColor(), 100)
+point1.position.set(0, 2, 0)
 point1.castShadow = true
 scene.add(point1)
+
 // définition des contrôles de la caméra
 const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
@@ -38,7 +45,7 @@ scene.add(camera)
 
 // GLOBAL ELEMENTS DEF
 const plane = new THREE.PlaneGeometry(10, 10)
-const groundMaterial = new THREE.MeshPhongMaterial({color: 0x003535})
+const groundMaterial = new THREE.MeshPhongMaterial({color: 0x353535})
 const ground = new THREE.Mesh(plane, groundMaterial)
 ground.receiveShadow = true;
 ground.castShadow = true;
@@ -60,10 +67,17 @@ class Ball {
 // FUNCTION DEF
 const generateSpheres = (nb) => {
     let spheres = []
-    for (let i = 0; i <= nb; i++) {
+    for (let i = 0; i < nb; i++) {
         const sphereMesh = new Ball(new THREE.Vector3(Math.random()*10-5, .2, Math.random()*10-5), Math.random()*(2*Math.PI), "none", new THREE.Mesh(sphere, sphereMaterial))
         sphereMesh.mesh.castShadow = true;
         sphereMesh.mesh.receiveShadow = true;
+
+        // const point = new THREE.PointLight(0xffffff, 10)
+        // point.position.set(0, 1, 0)
+        // point.castShadow = true
+        // sphereMesh.mesh.add(point)
+
+        
         spheres.push(sphereMesh)
         scene.add(sphereMesh.mesh)
     }
@@ -73,37 +87,66 @@ const generateSpheres = (nb) => {
 function moveSpheres() {
     for (let i = 0; i < spheres.length; i++) {
         const sphere = spheres[i];
-        if (sphere.state === "none") {
-            const speed = 0.01; // Adjust the speed as needed
-            sphere.pos.x += Math.cos(sphere.angle) * speed;
-            sphere.pos.z += Math.sin(sphere.angle) * speed;
+        const speed = 0.01; // Adjust the speed as needed
+        sphere.pos.x += Math.cos(sphere.angle) * speed;
+        sphere.pos.z += Math.sin(sphere.angle) * speed;
 
-            // Add logic to handle boundaries if needed
-            // For example, if you want to keep the spheres within -5 and 5
-            if (sphere.pos.x < -5) sphere.pos.x = 5;
-            if (sphere.pos.x > 5) sphere.pos.x = -5;
-            if (sphere.pos.z < -5) sphere.pos.z = 5;
-            if (sphere.pos.z > 5) sphere.pos.z = -5;
+        // Add logic to handle boundaries if needed
+        // For example, if you want to keep the spheres within -5 and 5
+        if (sphere.pos.x < -5) sphere.pos.x = 5;
+        if (sphere.pos.x > 5) sphere.pos.x = -5;
+        if (sphere.pos.z < -5) sphere.pos.z = 5;
+        if (sphere.pos.z > 5) sphere.pos.z = -5;
 
-            // Update the position of the mesh
-            sphere.mesh.position.copy(sphere.pos);
-        }
+        // Update the position of the mesh
+        sphere.mesh.position.copy(sphere.pos);
     }
 }
 
 function drawSpheres() {
     for (let i = 0; i < spheres.length; i++) {
-        const sphere = spheres[i];
+        let sphere = spheres[i];
         sphere.mesh.position.copy(sphere.pos);
     }
 }
 
-// LA SUITE QUOI
-const spheres = generateSpheres(10);
+function checkCollisions() {
+    for (let i = 0; i < spheres.length; i++) {
+        for (let j = 0; j < spheres.length; j++) {
+            if (i != j) {
+                let sphereA = spheres[i];
+                let sphereB = spheres[j];
+    
+                const distance = sphereA.pos.distanceTo(sphereB.pos);
+                const sumRadii = sphereA.mesh.geometry.parameters.radius + sphereB.mesh.geometry.parameters.radius;
+    
+                if (distance < sumRadii) {
+                    // sphereA.state = "collided"
+                    // sphereB.state = "collided"
+                    scene.remove(sphereA.mesh)
+                    scene.remove(sphereB.mesh)
+                    spheres.splice(i, 1)
+                    spheres.splice(j-1, 1)
+                    let newSpheres = generateSpheres(2)
+                    spheres.push(newSpheres[0])
+                    spheres.push(newSpheres[1])
+                    return spheres
+                } 
+                if (distance > sumRadii) {
+                    // sphereA.state = "none"
+                    // sphereB.state = "none"
+                }
+            }
+        }
+    }
+    return spheres
+}
 
+// LE CODE
+let spheres = generateSpheres(10)
 
+// ------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------
 
 
 
@@ -119,9 +162,10 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update();
     moveSpheres()
+    spheres = checkCollisions();
+
     drawSpheres()
     renderer.render(scene, camera);
 }
 
-// on applique des règles autant de fois qu'on a défini d'itérations 
 animate();

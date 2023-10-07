@@ -17,6 +17,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 // lumières
 scene.add(new THREE.AmbientLight(0xd2b48c, 5))
+const point1 = new THREE.PointLight(0xffffff, 100)
+point1.position.set(5, 5, 5)
+point1.castShadow = true
+scene.add(point1)
 // définition des contrôles de la caméra
 const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
@@ -34,13 +38,15 @@ scene.add(camera)
 
 // GLOBAL ELEMENTS DEF
 const plane = new THREE.PlaneGeometry(10, 10)
-const groundMaterial = new THREE.MeshPhongMaterial({color: 0x444444})
+const groundMaterial = new THREE.MeshPhongMaterial({color: 0x003535})
 const ground = new THREE.Mesh(plane, groundMaterial)
+ground.receiveShadow = true;
+ground.castShadow = true;
 ground.rotation.x = -Math.PI/2
 scene.add(ground)
 
-const sphere = new THREE.SphereGeometry(.1);
-const sphereMaterial = new THREE.MeshPhongMaterial({color: 0x888888});
+const sphere = new THREE.SphereGeometry(.2);
+const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
 
 // CLASS DEF
 class Ball {
@@ -55,7 +61,9 @@ class Ball {
 const generateSpheres = (nb) => {
     let spheres = []
     for (let i = 0; i <= nb; i++) {
-        const sphereMesh = new Ball(new THREE.Vector3(Math.random()*10-5, .05, Math.random()*10-5), Math.random()*(2*Math.PI), "none", new THREE.Mesh(sphere, sphereMaterial))
+        const sphereMesh = new Ball(new THREE.Vector3(Math.random()*10-5, .2, Math.random()*10-5), Math.random()*(2*Math.PI), "none", new THREE.Mesh(sphere, sphereMaterial))
+        sphereMesh.mesh.castShadow = true;
+        sphereMesh.mesh.receiveShadow = true;
         spheres.push(sphereMesh)
         scene.add(sphereMesh.mesh)
     }
@@ -103,10 +111,10 @@ const spheres = generateSpheres(10);
 
 
 
-
+// HELPERS
+scene.add(new THREE.PointLightHelper(point1, 1))
 
 // LOOP
-
 function animate() {
     requestAnimationFrame(animate);
     controls.update();

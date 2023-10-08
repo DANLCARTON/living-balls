@@ -3,9 +3,9 @@ import { OrbitControls } from 'OrbitControls'; // importation de l'addon Orbit C
 import { TrackballControls } from 'TrackballControls'; // importation de l'addon Orbit Controls pour la gestion de la caméra
 import { FlyControls } from 'FlyControls';
 import { FirstPersonControls } from 'FirstPersonControls';
+import {random3} from "./max.js"
 
 // BASIC SETUP
-
 // définition de la scene et de la caméra
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1100000);
@@ -21,10 +21,10 @@ function getRandomColor() {
     return Math.random() * 0xffffff;
 }
 
-scene.add(new THREE.AmbientLight(0xd2b48c, .1))
+scene.add(new THREE.AmbientLight(getRandomColor(), 1))
 
-const point1 = new THREE.PointLight(getRandomColor(), 100)
-point1.position.set(0, 2, 0)
+const point1 = new THREE.PointLight(getRandomColor(), 200)
+point1.position.set(0, 2.5, 0)
 point1.castShadow = true
 scene.add(point1)
 
@@ -32,7 +32,9 @@ scene.add(point1)
 const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
 
-
+// PARAMS
+const sexDistrib = 0.48
+const minAttractivityNecessary = 0.4
 
 
 
@@ -52,53 +54,93 @@ ground.castShadow = true;
 ground.rotation.x = -Math.PI/2
 scene.add(ground)
 
-const sphere = new THREE.SphereGeometry(.2);
-const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
+// const sphere = new THREE.SphereGeometry(.2, 8, 8);
+// const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
+const attractivityMaterial = new THREE.MeshPhongMaterial({color: 0xffdddd})
+const strengthMaterial = new THREE.MeshPhongMaterial({color: 0xddffdd})
+const basicMaterial = new THREE.MeshPhongMaterial({color: 0xffffff})
+const maleGeometry = new THREE.BoxGeometry(.4, .4, .4)
+const femaleGeometry = new THREE.SphereGeometry(.2, 8, 8)
 
 // CLASS DEF
 class Ball {
-    constructor(pos, angle, mesh) {
+    constructor(pos, angle, mesh, sex, attractivity, strength, speed) {
         this.pos = pos;
         this.angle = angle;
         this.mesh = mesh;
+        this.sex = sex;
+        this.attractivity = attractivity
+        this.strength = strength
+        this.speed = speed
     }
 }
 
 // FUNCTION DEF
-const generateSpheres = (nb) => {
-    let spheres = []
-    for (let i = 0; i < nb; i++) {
-        const sphereMesh = new Ball(new THREE.Vector3(Math.random()*10-5, .2, Math.random()*10-5), Math.random()*(2*Math.PI), "none", new THREE.Mesh(sphere, sphereMaterial))
-        sphereMesh.mesh.castShadow = true;
-        sphereMesh.mesh.receiveShadow = true;
+const generateSphere = (sex, attractivity, strength, speed) => {
+    const ball = new Ball(
+        new THREE.Vector3(Math.random()*10-5, .2, Math.random()*10-5), 
+        Math.random()*(2*Math.PI), 
+        undefined,
+        sex,
+        attractivity,
+        strength,
+        speed
+    )
 
-        // const point = new THREE.PointLight(0xffffff, 10)
-        // point.position.set(0, 1, 0)
-        // point.castShadow = true
-        // sphereMesh.mesh.add(point)
+    console.log(attractivity, strength, sex)
 
-        
-        spheres.push(sphereMesh)
-        scene.add(sphereMesh.mesh)
+    ball.mesh = new THREE.Mesh(new THREE.SphereGeometry(ball.attractivity/4+.2, 8, 8), attractivityMaterial)
+
+    const strengthBall = new THREE.Mesh(new THREE.SphereGeometry(ball.strength/4+.2, 8, 8), strengthMaterial)
+    strengthBall.position.set(0, .5, 0);
+    ball.mesh.add(strengthBall)
+    strengthBall.castShadow = true
+    strengthBall.receiveShadow = true
+
+    const sexGeometry = new THREE.Mesh(ball.sex == "M" ? maleGeometry : femaleGeometry, basicMaterial)
+    sexGeometry.position.set(0, 1, 0)
+    ball.mesh.add(sexGeometry)
+    sexGeometry.castShadow = true
+    sexGeometry.receiveShadow = true
+
+    ball.mesh.castShadow = true;
+    ball.mesh.receiveShadow = true;
+
+    scene.add(ball.mesh)
+
+    return ball
+}
+
+const meet = (ball1, ball2) => {
+    if (ball1.sex != ball2.sex) {
+        if (Math.abs(ball1.attractivity - ball2.attractivity) <= minAttractivityNecessary) {
+            console.log("CROSSOVER")
+            console.log("MUTATION")
+        } else {
+            console.log(ball1, " & ", ball2, " don't mate")
+        }
+    } else if (ball1.sex == "M" && ball2.sex == "F") {
+        console.log("FIGHT")
+    } else if (ball1.sex == "F" && ball2.sex == "F") {
+        console.log("ATTRACTIVITY")
     }
-    return spheres
 }
 
 function moveSpheres() {
     for (let i = 0; i < spheres.length; i++) {
-        const sphere = spheres[i];
-        const speed = 0.01; 
-        sphere.pos.x += Math.cos(sphere.angle) * speed;
-        sphere.pos.z += Math.sin(sphere.angle) * speed;
+        const ball = spheres[i];
+        const speed = ball.speed/50; 
+        ball.pos.x += Math.cos(ball.angle) * speed;
+        ball.pos.z += Math.sin(ball.angle) * speed;
 
         // gestion des bords du plan
-        if (sphere.pos.x < -5) sphere.pos.x = 5;
-        if (sphere.pos.x > 5) sphere.pos.x = -5;
-        if (sphere.pos.z < -5) sphere.pos.z = 5;
-        if (sphere.pos.z > 5) sphere.pos.z = -5;
+        if (ball.pos.x < -5) ball.pos.x = 5;
+        if (ball.pos.x > 5) ball.pos.x = -5;
+        if (ball.pos.z < -5) ball.pos.z = 5;
+        if (ball.pos.z > 5) ball.pos.z = -5;
 
         // Update the position of the mesh
-        sphere.mesh.position.copy(sphere.pos);
+        ball.mesh.position.copy(ball.pos);
     }
 }
 
@@ -113,22 +155,24 @@ function checkCollisions() {
     for (let i = 0; i < spheres.length; i++) {
         for (let j = 0; j < spheres.length; j++) {
             if (i != j) {
-                let sphereA = spheres[i];
-                let sphereB = spheres[j];
+                let ball1 = spheres[i];
+                let ball2 = spheres[j];
     
-                const distance = sphereA.pos.distanceTo(sphereB.pos);
-                const sumRadii = sphereA.mesh.geometry.parameters.radius + sphereB.mesh.geometry.parameters.radius;
+                const distance = ball1.pos.distanceTo(ball2.pos);
+                const sumRadii = ball1.mesh.geometry.parameters.radius + ball2.mesh.geometry.parameters.radius;
     
                 if (distance < sumRadii) {
                     // code a executer quand deux spheres se rencontrent. 
-                    scene.remove(sphereA.mesh)
-                    scene.remove(sphereB.mesh)
-                    spheres.splice(i, 1)
-                    spheres.splice(j-1, 1)
-                    let newSpheres = generateSpheres(2)
-                    spheres.push(newSpheres[0])
-                    spheres.push(newSpheres[1])
-                    return spheres
+                    // scene.remove(sphereA.mesh)
+                    // scene.remove(sphereB.mesh)
+                    // spheres.splice(i, 1)
+                    // spheres.splice(j-1, 1)
+                    // let newSphere0 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3())
+                    // let newSphere1 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3())
+                    // spheres.push(newSphere0)
+                    // spheres.push(newSphere1)
+                    // return spheres
+                    meet(ball1, ball2)
                 } 
                 if (distance > sumRadii) {
                     continue
@@ -140,7 +184,19 @@ function checkCollisions() {
 }
 
 // LE CODE
-let spheres = generateSpheres(10)
+let spheres = [] 
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+console.log(spheres)
+
 
 // ------------------------------------------------------------------------------------------------
 

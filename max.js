@@ -16,7 +16,8 @@ function random3() {     // Génère un nombre aléatoire entre 0 et 1 avec 3 ch
     return parseFloat(randomNum);
   }
 
-class Individu {
+class Individu 
+{
     constructor(sexe, attractivite, force, vitesse, position) {
       this.sexe = sexe;
       this.attractivite = attractivite;
@@ -33,6 +34,10 @@ class Individu {
         console.error('Le sexe doit être "homme" ou "femme".');
       }
     }
+  
+    getSexe() {
+      return this.sexe;
+    }
 
     // position
 
@@ -48,6 +53,34 @@ class Individu {
     getPosition() {
         return { x: this.x, y: this.y };
     }
+  
+    // attractivité
+    setAttractivite(attractivite) {
+      this.attractivite = attractivite;
+    }
+  
+    getAttractivite() {
+      return this.attractivite;
+    }
+  
+    // force
+    setForce(force) {
+      this.force = force;
+    }
+  
+    getForce() {
+      return this.force;
+    }
+  
+    // vitesse
+    setVitesse(vitesse) {
+      this.vitesse = vitesse;
+    }
+  
+    getVitesse() {
+      return this.vitesse;
+    }
+
 }
 
 // POPULATION
@@ -58,46 +91,48 @@ for (let i = 0; i < NumberPopulation; i++) {
   const attractivite = random3();
   const force = random3();
   const vitesse = random3();
+
   const individu = new Individu(sexe, attractivite, force, vitesse);
   population.push(individu);
 }
 
 // CROSSOVER (H vs F)
 
-function crossover(parent1 , parent2, population) {
-// Enfant 1
+function crossover(parent1 , parent2, population)
+{
+  // Enfant 1
   const caractéristiquesEnfant1 = {
-      attractivite: random3() < 0.5 ? parent1.attractivite : parent2.attractivite,
-      force: random3() < 0.5 ? parent1.force : parent2.force,
-      vitesse: random3() < 0.5 ? parent1.vitesse : parent2.vitesse
+      attractivite: random3() < 0.5 ? parent1.getAttractivite() : parent2.getAttractivite(),
+      force: random3() < 0.5 ? parent1.getForce() : parent2.getForce(),
+      vitesse: random3() < 0.5 ? parent1.getVitesse() : parent2.getVitesse()
   };
 
   // Enfant 2
   const caractéristiquesEnfant2 = {
-      attractivite: random3() < 0.5 ? parent1.attractivite : parent2.attractivite,
-      force: random3() < 0.5 ? parent1.force : parent2.force,
-      vitesse: random3() < 0.5 ? parent1.vitesse : parent2.vitesse
+      attractivite: random3() < 0.5 ? parent1.getAttractivite() : parent2.getAttractivite(),
+      force: random3() < 0.5 ? parent1.getForce() : parent2.getForce(),
+      vitesse: random3() < 0.5 ? parent1.getVitesse() : parent2.getVitesse()
   };
 
-  if (caractéristiquesEnfant1.attractivite === parent1.attractivite){ 
-      caractéristiquesEnfant2.attractivite = parent2.attractivite 
+  if (caractéristiquesEnfant1.attractivite === parent1.getAttractivite()){
+      caractéristiquesEnfant2.attractivite = parent2.getAttractivite()
   }
   else{
-      caractéristiquesEnfant2.attractivite = parent1.attractivite
+      caractéristiquesEnfant2.attractivite = parent1.getAttractivite()
   }
 
-  if (caractéristiquesEnfant1.force === parent1.force){
-      caractéristiquesEnfant2.force = parent2.force
+  if (caractéristiquesEnfant1.force === parent1.getForce()){
+      caractéristiquesEnfant2.force = parent2.getForce()
   }
   else{
-      caractéristiquesEnfant2.force = parent1.force
+      caractéristiquesEnfant2.force = parent1.getForce()
   }
 
-  if (caractéristiquesEnfant1.vitesse === parent1.vitesse){
-      caractéristiquesEnfant2.vitesse = parent2.vitesse
+  if (caractéristiquesEnfant1.vitesse === parent1.getVitesse()){
+      caractéristiquesEnfant2.vitesse = parent2.getVitesse()
   }
   else{
-      caractéristiquesEnfant2.vitesse = parent1.vitesse
+      caractéristiquesEnfant2.vitesse = parent1.getVitesse()
   }
 
   const enfant1 = new Individu(
@@ -116,32 +151,34 @@ function crossover(parent1 , parent2, population) {
       [parent2.position[0] - 1, parent2.position[1] - 1]
   );
 
+  console.log(enfant1)
+  console.log(enfant2)
   population.push(enfant1);
   population.push(enfant2);
 } 
 
 // Mutation (Enfants)
 
-function mutation(enfant1, enfant2) {
-  const enfants = [enfant1, enfant2]
-  const enfantsIndex = Math.floor(Math.random() * 2);
-  const enfant = enfants[enfantsIndex];
+// function mutation(enfant1, enfant2) {
+//   const enfants = [enfant1, enfant2]
+//   const enfantsIndex = Math.floor(Math.random() * 2);
+//   const enfant = enfants[enfantsIndex];
 
-  const caracteristiqueIndex = Math.floor(Math.random() * 3);
+//   const caracteristiqueIndex = Math.floor(Math.random() * 3);
 
-  if (caracteristiqueIndex === 0) {
-    enfant.attactivite = random3();
-  } 
-  else if (caracteristiqueIndex === 1) {
-    enfant.force = random3();
-  } 
-  else if (caracteristiqueIndex === 2) {
-    enfant.vitesse = random3();
-  } 
-  else {
-    console.error('Caractéristique invalide.');
-  }
-}
+//   if (caracteristiqueIndex == 0) {
+//     enfant.setAttractivite(random3());
+//   } 
+//   else if (caracteristiqueIndex == 1) {
+//     enfant.setForce(random3());
+//   } 
+//   else if (caracteristiqueIndex == 2) {
+//     enfant.setVitesse(random3());
+//   } 
+//   else {
+//     console.error('Caractéristique invalide.');
+//   }
+// }
   
 // COMBAT (H vs H)
 
@@ -171,19 +208,17 @@ function UpAttractivity(individu1, individu2){
 // RENCONTRE
 
 function meet(individu1, individu2, population) {
-    if (individu1.sexe !== individu2.sexe)
-      if (Math.abs(individu1.attractivite - individu2.attractivite) <= Condition_Crossover){
+    if (individu1.getSexe() != individu2.getSexe()) { 
+      if (Math.abs(individu1.getAttractivite() - individu2.getAttractivite()) <= Condition_Crossover){
         crossover(individu1, individu2, population)
-        mutation(population(population.length() - 1), population(population.length() - 2))
-      }  
-      else {
-        console.log('Les individus ne veuleut pas s\'accoupler')
+        // mutation(population(population.length() - 1), population(population.length() - 2))
+      }  else {
+        console.log('Les individus ne veuleut pas s accoupler')
       }
-    else if (individu1.sexe === "homme" || individu2.sexe === "homme")
-    {
+    } else if (individu1.getSexe() == "homme" || individu2.getSexe() == "homme"){
       return fight(individu1, individu2, population)
     }
-    else if (individu1.sexe === "femme" || individu2.sexe === "femme"){
+    else if (individu1.getSexe() == "femme" || individu2.getSexe() == "femme"){
       UpAttractivity(individu1, individu2)
     }
 }
@@ -199,10 +234,12 @@ const individu3 = new Individu('femme', 0.745, 0.527, 0.245, [-1, 3])
 const population1 = [individu0, individu1, individu2, individu3]
 
 // const enfants = meet(individu0, individu1, population1)
-const enfants = meet(individu0, individu3, population1)
+// const enfants = meet(individu0, individu3, population1)
 // const meet1 = meet(individu0, individu2, population1)
 // const meet2 = meet(individu1, individu3, population1)
 
+console.log(population1)
+console.log(population)
 
 console.log('Population :', population1);
 // console.log('individu1 :', individu1)
@@ -211,71 +248,8 @@ console.log('Population :', population1);
 // console.log('fight :', individu0, individu2)
 // console.log('up attract :', individu1, individu3)
 
+// mutation(enfants);
 
-mutation(enfants);
+// console.log('Nouveaux individus créés après mutation :', enfants);
 
-console.log('Nouveaux individus créés après mutation :', enfants);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// définition de la scene et de la caméra
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1100000 );
-camera.position.z = 50
-camera.position.y = 50
-const renderer = new THREE.WebGLRenderer();
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-
-// lumières
-scene.add(new THREE.AmbientLight(0xd2b48c, 5))
-
-const point = new THREE.PointLight(0xff8888, 12)
-point.position.set(0, 2, 0)
-point.castShadow = true
-camera.add(point)
-
-const point2 = new THREE.PointLight(0x88ff88, 12)
-point2.position.set(0, -2, 0)
-point2.castShadow = true
-camera.add(point2)
-
-const point3 = new THREE.PointLight(0x8888ff, 12)
-point3.position.set(2, 0, 0)
-point3.castShadow = true
-camera.add(point3)
-
-const point4 = new THREE.PointLight(0xffff88, 12)
-point4.position.set(-2, 0, 0)
-point4.castShadow = true
-camera.add(point4)
-
-// définition des contrôles de la caméra
-const controls = new OrbitControls(camera, renderer.domElement);
-scene.add(camera)
-
-
-// boucle de rendu
-function animate() {
-    requestAnimationFrame( animate );
-controls.update()
-    renderer.render( scene, camera );
-}
-
-animate();
+export {meet, fight, crossover, random3}

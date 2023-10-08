@@ -33,7 +33,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
 
 // PARAMS
-const sexDistrib = 0.48
+const sexDistrib = 0.75
 const minAttractivityNecessary = 0.4
 
 
@@ -111,7 +111,6 @@ const generateSphere = (sex, attractivity, strength, speed) => {
     return ball
 }
 
-
 const crossover = (super1, super2) => {
     const kid1Stats = {
         attractivity: random3() < .5 ? super1.attractivity : super2.attractivity,
@@ -141,6 +140,20 @@ const crossover = (super1, super2) => {
     spheres.push(kid2)
 }
 
+const fight = (ball1, ball2, index1, index2) => {
+    if (ball1.strength > ball2.strength) {
+        spheres.splice(index2, 1)
+        scene.remove(ball2.mesh)
+        console.log(ball2.strength, "was killed by", ball1.strength)
+    } else if (ball1.strength < ball2.strength) {
+        spheres.splice(index1, 1)
+        scene.remove(ball1.mesh)
+        console.log(ball1.strength, "was killed by", ball2.strength)
+    } else {
+        console.log("tie !")
+    }
+}
+
 const meet = (ball1, ball2, index1, index2) => {
     if (ball1.sex != ball2.sex) {
         if (Math.abs(ball1.attractivity - ball2.attractivity) <= minAttractivityNecessary) {
@@ -151,10 +164,10 @@ const meet = (ball1, ball2, index1, index2) => {
             scene.remove(ball2.mesh)
             console.log("MUTATION")
         } else {
-            console.log(ball1, " & ", ball2, " don't mate")
+            console.log(ball1.attractivity, " & ", ball2.attractivity, " don't mate")
         }
     } else if (ball1.sex == "M" && ball2.sex == "M") {
-        console.log("FIGHT")
+        fight(ball1, ball2, index1, index2)
     } else if (ball1.sex == "F" && ball2.sex == "F") {
         console.log("ATTRACTIVITY")
     }
@@ -163,7 +176,7 @@ const meet = (ball1, ball2, index1, index2) => {
 function moveSpheres() {
     for (let i = 0; i < spheres.length; i++) {
         const ball = spheres[i];
-        const speed = ball.speed/50; 
+        const speed = ball.speed/50+0.01; 
         ball.pos.x += Math.cos(ball.angle) * speed;
         ball.pos.z += Math.sin(ball.angle) * speed;
 
@@ -207,6 +220,7 @@ function checkCollisions() {
                     // spheres.push(newSphere1)
                     // return spheres
                     meet(ball1, ball2, i, j)
+                    return spheres
                 } 
                 if (distance > sumRadii) {
                     continue

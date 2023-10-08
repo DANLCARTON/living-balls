@@ -3,7 +3,7 @@ import { OrbitControls } from 'OrbitControls'; // importation de l'addon Orbit C
 import { TrackballControls } from 'TrackballControls'; // importation de l'addon Orbit Controls pour la gestion de la caméra
 import { FlyControls } from 'FlyControls';
 import { FirstPersonControls } from 'FirstPersonControls';
-import {random3} from "./max.js"
+import { random3 } from "./max.js"
 
 // BASIC SETUP
 // définition de la scene et de la caméra
@@ -32,6 +32,9 @@ scene.add(point1)
 const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
 
+// VARIABLES
+let globalBallId = 0;
+
 // PARAMS
 const startPopulation = 5
 const area = 10
@@ -48,23 +51,25 @@ const attractivenessBoost = 0.001
 
 // GLOBAL ELEMENTS DEF
 const plane = new THREE.PlaneGeometry(area, area)
-const groundMaterial = new THREE.MeshPhongMaterial({color: 0x353535})
+const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x353535 })
 const ground = new THREE.Mesh(plane, groundMaterial)
 ground.receiveShadow = true;
-ground.rotation.x = -Math.PI/2
+ground.rotation.x = -Math.PI / 2
 scene.add(ground)
 
 // const sphere = new THREE.SphereGeometry(.2, 8, 8);
 // const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
-const attractivenessMaterial = new THREE.MeshPhongMaterial({color: 0xffdddd})
-const strengthMaterial = new THREE.MeshPhongMaterial({color: 0xddffdd})
-const basicMaterial = new THREE.MeshPhongMaterial({color: 0xffffff})
+const attractivenessMaterial = new THREE.MeshPhongMaterial({ color: 0xffdddd })
+const strengthMaterial = new THREE.MeshPhongMaterial({ color: 0xddffdd })
+const basicMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff })
 const maleGeometry = new THREE.BoxGeometry(.4, .4, .4)
 const femaleGeometry = new THREE.SphereGeometry(.2, 8, 8)
 
 // CLASS DEF
 class Ball {
     constructor(pos, angle, mesh, sex, attractiveness, strength, speed) {
+        this.id = globalBallId
+        globalBallId++
         this.pos = pos;
         this.angle = angle;
         this.mesh = mesh;
@@ -78,8 +83,8 @@ class Ball {
 // FUNCTION DEF
 const generateSphere = (sex, attractiveness, strength, speed) => {
     const ball = new Ball(
-        new THREE.Vector3(Math.random()*10-5, .2, Math.random()*10-5), 
-        Math.random()*(2*Math.PI), 
+        new THREE.Vector3(Math.random() * 10 - 5, .2, Math.random() * 10 - 5),
+        Math.random() * (2 * Math.PI),
         undefined,
         sex,
         attractiveness,
@@ -87,9 +92,9 @@ const generateSphere = (sex, attractiveness, strength, speed) => {
         speed
     )
 
-    ball.mesh = new THREE.Mesh(new THREE.SphereGeometry(ball.strength/4+.2, 8, 8), strengthMaterial)
+    ball.mesh = new THREE.Mesh(new THREE.SphereGeometry(ball.strength / 4 + .2, 8, 8), strengthMaterial)
 
-    const attractivenessBall = new THREE.Mesh(new THREE.SphereGeometry(ball.attractiveness/4+.2, 8, 8), attractivenessMaterial)
+    const attractivenessBall = new THREE.Mesh(new THREE.SphereGeometry(ball.attractiveness / 4 + .2, 8, 8), attractivenessMaterial)
     attractivenessBall.position.set(0, .5, 0);
     ball.mesh.add(attractivenessBall)
     attractivenessBall.castShadow = true
@@ -106,6 +111,8 @@ const generateSphere = (sex, attractiveness, strength, speed) => {
 
     scene.add(ball.mesh)
 
+    console.log("🎉", ball.id, "is born!")
+
     return ball
 }
 
@@ -113,13 +120,13 @@ const crossover = (super1, super2) => {
     const kid1Stats = {
         attractiveness: random3() < .5 ? super1.attractiveness : super2.attractiveness,
         strength: random3() < .5 ? super1.strength : super2.strength,
-        speed : random3() < .5 ? super1.speed : super2.speed
+        speed: random3() < .5 ? super1.speed : super2.speed
     }
 
     const kid2Stats = {
         attractiveness: random3() < .5 ? super1.attractiveness : super2.attractiveness,
         strength: random3() < .5 ? super1.strength : super2.strength,
-        speed : random3() < .5 ? super1.speed : super2.speed
+        speed: random3() < .5 ? super1.speed : super2.speed
     }
 
     if (kid1Stats.attractiveness == super1.attractiveness) kid2Stats.attractiveness = super2.attractiveness
@@ -128,11 +135,13 @@ const crossover = (super1, super2) => {
     if (kid1Stats.strength == super1.strength) kid2Stats.strength = super2.strength
     else kid2Stats.strength = super1.strength
 
-    if (kid1Stats.speed == super1.speed) kid2Stats.speed = super2.speed 
+    if (kid1Stats.speed == super1.speed) kid2Stats.speed = super2.speed
     else kid2Stats.speed = super1.speed
 
     let kid1 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", kid1Stats.attractiveness, kid1Stats.strength, kid1Stats.speed)
     let kid2 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", kid2Stats.attractiveness, kid2Stats.strength, kid2Stats.speed)
+
+    Math.floor(Math.random()) < .5 ? mutation(kid1) : mutation(kid2)
 
     spheres.push(kid1)
     spheres.push(kid2)
@@ -142,19 +151,27 @@ const fight = (ball1, ball2, index1, index2) => {
     if (ball1.strength > ball2.strength) {
         spheres.splice(index2, 1)
         scene.remove(ball2.mesh)
-        console.log(ball2.strength, "was killed by", ball1.strength)
+        console.log("💀", ball2.id, "was slain by", ball1.id)
     } else {
         spheres.splice(index1, 1)
         scene.remove(ball1.mesh)
-        console.log(ball1.strength, "was killed by", ball2.strength)
+        console.log("💀", ball1.id, "was slain by", ball2.id)
     }
 }
 
 const enhanceAttractiveness = (ball1, ball2) => {
-    ball1.attractiveness < ball2.attractiveness ? console.log(ball2.attractiveness, "makes", ball1.attractiveness, "more attractive") : console.log(ball1.attractiveness, "makes", ball2.attractiveness, "more attractive")
+    ball1.attractiveness < ball2.attractiveness ? console.log("👏", ball2.id, "makes", ball1.id, "more attractive") : console.log("👏", ball1.id, "makes", ball2.id, "more attractive")
     ball1.attractiveness < ball2.attractiveness ? ball1.attractiveness += attractivenessBoost : ball2.attractiveness += attractivenessBoost
-    ball1.mesh.children[0].scale.set(1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2);
-    ball2.mesh.children[0].scale.set(1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2);
+    ball1.mesh.children[0].scale.set(1 + ball1.attractiveness / 4 + 0.2, 1 + ball1.attractiveness / 4 + 0.2, 1 + ball1.attractiveness / 4 + 0.2);
+    ball2.mesh.children[0].scale.set(1 + ball2.attractiveness / 4 + 0.2, 1 + ball2.attractiveness / 4 + 0.2, 1 + ball2.attractiveness / 4 + 0.2);
+}
+
+const mutation = (kid) => {
+    console.log("🕴", kid.id, "is a mutant")
+    const statIndex = Math.floor(Math.random() * 3)
+    if (statIndex == 0) kid.attractiveness = random3()
+    else if (statIndex == 1) kid.strength = random3()
+    else if (statIndex == 2) kid.speed = random3()
 }
 
 const meet = (ball1, ball2, index1, index2) => {
@@ -166,13 +183,11 @@ const meet = (ball1, ball2, index1, index2) => {
                 scene.remove(ball1.mesh)
                 spheres.splice(index1, 1)
             } else {
-                console.log(ball2.sex)
                 scene.remove(ball2.mesh)
                 spheres.splice(index2, 1)
             }
-            console.log("MUTATION")
         } else {
-            console.log(ball1.attractiveness, " & ", ball2.attractiveness, " don't mate")
+            console.log("👨‍🦯", ball1.id, "&", ball2.id, "won't mate")
         }
     } else if (ball1.sex == "M" && ball2.sex == "M") {
         fight(ball1, ball2, index1, index2)
@@ -184,15 +199,15 @@ const meet = (ball1, ball2, index1, index2) => {
 function moveSpheres() {
     for (let i = 0; i < spheres.length; i++) {
         const ball = spheres[i];
-        const speed = ball.speed/50+0.01; 
+        const speed = ball.speed / 50 + 0.01;
         ball.pos.x += Math.cos(ball.angle) * speed;
         ball.pos.z += Math.sin(ball.angle) * speed;
 
         // gestion des bords du plan
-        if (ball.pos.x < -area/2) ball.pos.x = area/2;
-        if (ball.pos.x > area/2) ball.pos.x = -area/2;
-        if (ball.pos.z < -area/2) ball.pos.z = area/2;
-        if (ball.pos.z > area/2) ball.pos.z = -area/2;
+        if (ball.pos.x < -area / 2) ball.pos.x = area / 2;
+        if (ball.pos.x > area / 2) ball.pos.x = -area / 2;
+        if (ball.pos.z < -area / 2) ball.pos.z = area / 2;
+        if (ball.pos.z > area / 2) ball.pos.z = -area / 2;
 
         // Update the position of the mesh
         ball.mesh.position.copy(ball.pos);
@@ -212,14 +227,14 @@ function checkCollisions() {
             if (i != j) {
                 let ball1 = spheres[i];
                 let ball2 = spheres[j];
-    
+
                 const distance = ball1.pos.distanceTo(ball2.pos);
                 const sumRadii = ball1.mesh.geometry.parameters.radius + ball2.mesh.geometry.parameters.radius;
-    
+
                 if (distance < sumRadii) {
                     meet(ball1, ball2, i, j)
                     return spheres
-                } 
+                }
                 if (distance > sumRadii) {
                     continue
                 }
@@ -230,13 +245,11 @@ function checkCollisions() {
 }
 
 // LE CODE
-let spheres = [] 
+let spheres = []
 
 for (let i = 0; i < startPopulation; i++) {
     spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
 }
-
-console.log(spheres)
 
 
 // ------------------------------------------------------------------------------------------------

@@ -111,15 +111,49 @@ const generateSphere = (sex, attractivity, strength, speed) => {
     return ball
 }
 
-const meet = (ball1, ball2) => {
+
+const crossover = (super1, super2) => {
+    const kid1Stats = {
+        attractivity: random3() < .5 ? super1.attractivity : super2.attractivity,
+        strength: random3() < .5 ? super1.strength : super2.strength,
+        speed : random3() < .5 ? super1.speed : super2.speed
+    }
+
+    const kid2Stats = {
+        attractivity: random3() < .5 ? super1.attractivity : super2.attractivity,
+        strength: random3() < .5 ? super1.strength : super2.strength,
+        speed : random3() < .5 ? super1.speed : super2.speed
+    }
+
+    if (kid1Stats.attractivity == super1.attractivity) kid2Stats.attractivity = super2.attractivity
+    else kid2Stats.attractivity = super1.attractivity
+
+    if (kid1Stats.strength == super1.strength) kid2Stats.strength = super2.strength
+    else kid2Stats.strength = super1.strength
+
+    if (kid1Stats.speed == super1.speed) kid2Stats.speed = super2.speed 
+    else kid2Stats.speed = super1.speed
+
+    let kid1 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", kid1Stats.attractivity, kid1Stats.strength, kid1Stats.speed)
+    let kid2 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", kid2Stats.attractivity, kid2Stats.strength, kid2Stats.speed)
+
+    spheres.push(kid1)
+    spheres.push(kid2)
+}
+
+const meet = (ball1, ball2, index1, index2) => {
     if (ball1.sex != ball2.sex) {
         if (Math.abs(ball1.attractivity - ball2.attractivity) <= minAttractivityNecessary) {
-            console.log("CROSSOVER")
+            crossover(ball1, ball2) // naissance de deux enfants
+            spheres.splice(index1, 1) // mort des deux parents
+            spheres.splice(index2-1, 1) // mort des deux parents
+            scene.remove(ball1.mesh)
+            scene.remove(ball2.mesh)
             console.log("MUTATION")
         } else {
             console.log(ball1, " & ", ball2, " don't mate")
         }
-    } else if (ball1.sex == "M" && ball2.sex == "F") {
+    } else if (ball1.sex == "M" && ball2.sex == "M") {
         console.log("FIGHT")
     } else if (ball1.sex == "F" && ball2.sex == "F") {
         console.log("ATTRACTIVITY")
@@ -172,7 +206,7 @@ function checkCollisions() {
                     // spheres.push(newSphere0)
                     // spheres.push(newSphere1)
                     // return spheres
-                    meet(ball1, ball2)
+                    meet(ball1, ball2, i, j)
                 } 
                 if (distance > sumRadii) {
                     continue

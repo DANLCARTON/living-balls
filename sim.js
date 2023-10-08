@@ -153,6 +153,7 @@ const fight = (ball1, ball2, index1, index2) => {
 }
 
 const enhanceAttractiveness = (ball1, ball2) => {
+    ball1.attractiveness < ball2.attractiveness ? console.log(ball2.attractiveness, "makes", ball1.attractiveness, "more attractive") : console.log(ball1.attractiveness, "makes", ball2.attractiveness, "more attractive")
     ball1.attractiveness < ball2.attractiveness ? ball1.attractiveness += attractivenessBoost : ball2.attractiveness += attractivenessBoost
     ball1.mesh.children[0].scale.set(1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2);
     ball2.mesh.children[0].scale.set(1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2);
@@ -179,7 +180,6 @@ const meet = (ball1, ball2, index1, index2) => {
         fight(ball1, ball2, index1, index2)
     } else if (ball1.sex == "F" && ball2.sex == "F") {
         enhanceAttractiveness(ball1, ball2)
-        console.log(ball1.attractiveness, ball2.attractiveness)
     }
 }
 

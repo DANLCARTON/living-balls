@@ -33,7 +33,9 @@ const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(camera)
 
 // PARAMS
-const sexDistrib = 0.60
+const startPopulation = 5
+const area = 10
+const sexDistrib = 0.48
 const minAttractivenessNecessary = 0.4
 const attractivenessBoost = 0.001
 
@@ -45,7 +47,7 @@ const attractivenessBoost = 0.001
 // ----------------------------------------------------------------
 
 // GLOBAL ELEMENTS DEF
-const plane = new THREE.PlaneGeometry(10, 10)
+const plane = new THREE.PlaneGeometry(area, area)
 const groundMaterial = new THREE.MeshPhongMaterial({color: 0x353535})
 const ground = new THREE.Mesh(plane, groundMaterial)
 ground.receiveShadow = true;
@@ -154,20 +156,24 @@ const fight = (ball1, ball2, index1, index2) => {
 }
 
 const enhanceAttractiveness = (ball1, ball2) => {
-    ball1.attractiveness += attractivenessBoost
-    ball2.attractiveness += attractivenessBoost
+    ball1.attractiveness < ball2.attractiveness ? ball1.attractiveness += attractivenessBoost : ball2.attractiveness += attractivenessBoost
     ball1.mesh.children[0].scale.set(1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2, 1+ball1.attractiveness/4 + 0.2);
     ball2.mesh.children[0].scale.set(1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2, 1+ball2.attractiveness/4 + 0.2);
 }
 
 const meet = (ball1, ball2, index1, index2) => {
+
     if (ball1.sex != ball2.sex) {
         if (Math.abs(ball1.attractiveness - ball2.attractiveness) <= minAttractivenessNecessary) {
             crossover(ball1, ball2) // naissance de deux enfants
-            spheres.splice(index1, 1) // mort des deux parents
-            spheres.splice(index2-1, 1) // mort des deux parents
-            scene.remove(ball1.mesh)
-            scene.remove(ball2.mesh)
+            if (ball1.sex == "F") {
+                scene.remove(ball1.mesh)
+                spheres.splice(index1, 1)
+            } else {
+                console.log(ball2.sex)
+                scene.remove(ball2.mesh)
+                spheres.splice(index2, 1)
+            }
             console.log("MUTATION")
         } else {
             console.log(ball1.attractiveness, " & ", ball2.attractiveness, " don't mate")
@@ -188,10 +194,10 @@ function moveSpheres() {
         ball.pos.z += Math.sin(ball.angle) * speed;
 
         // gestion des bords du plan
-        if (ball.pos.x < -5) ball.pos.x = 5;
-        if (ball.pos.x > 5) ball.pos.x = -5;
-        if (ball.pos.z < -5) ball.pos.z = 5;
-        if (ball.pos.z > 5) ball.pos.z = -5;
+        if (ball.pos.x < -area/2) ball.pos.x = area/2;
+        if (ball.pos.x > area/2) ball.pos.x = -area/2;
+        if (ball.pos.z < -area/2) ball.pos.z = area/2;
+        if (ball.pos.z > area/2) ball.pos.z = -area/2;
 
         // Update the position of the mesh
         ball.mesh.position.copy(ball.pos);
@@ -216,16 +222,6 @@ function checkCollisions() {
                 const sumRadii = ball1.mesh.geometry.parameters.radius + ball2.mesh.geometry.parameters.radius;
     
                 if (distance < sumRadii) {
-                    // code a executer quand deux spheres se rencontrent. 
-                    // scene.remove(sphereA.mesh)
-                    // scene.remove(sphereB.mesh)
-                    // spheres.splice(i, 1)
-                    // spheres.splice(j-1, 1)
-                    // let newSphere0 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3())
-                    // let newSphere1 = generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3())
-                    // spheres.push(newSphere0)
-                    // spheres.push(newSphere1)
-                    // return spheres
                     meet(ball1, ball2, i, j)
                     return spheres
                 } 
@@ -240,16 +236,11 @@ function checkCollisions() {
 
 // LE CODE
 let spheres = [] 
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
-spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+
+for (let i = 0; i < startPopulation; i++) {
+    spheres.push(generateSphere(Math.random() <= sexDistrib ? "M" : "F", random3(), random3(), random3()))
+}
+
 console.log(spheres)
 
 

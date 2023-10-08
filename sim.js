@@ -87,8 +87,6 @@ const generateSphere = (sex, attractiveness, strength, speed) => {
         speed
     )
 
-    console.log(attractiveness, strength, sex)
-
     ball.mesh = new THREE.Mesh(new THREE.SphereGeometry(ball.strength/4+.2, 8, 8), strengthMaterial)
 
     const attractivenessBall = new THREE.Mesh(new THREE.SphereGeometry(ball.attractiveness/4+.2, 8, 8), attractivenessMaterial)

@@ -51,7 +51,6 @@ const plane = new THREE.PlaneGeometry(area, area)
 const groundMaterial = new THREE.MeshPhongMaterial({color: 0x353535})
 const ground = new THREE.Mesh(plane, groundMaterial)
 ground.receiveShadow = true;
-ground.castShadow = true;
 ground.rotation.x = -Math.PI/2
 scene.add(ground)
 
@@ -146,12 +145,10 @@ const fight = (ball1, ball2, index1, index2) => {
         spheres.splice(index2, 1)
         scene.remove(ball2.mesh)
         console.log(ball2.strength, "was killed by", ball1.strength)
-    } else if (ball1.strength < ball2.strength) {
+    } else {
         spheres.splice(index1, 1)
         scene.remove(ball1.mesh)
         console.log(ball1.strength, "was killed by", ball2.strength)
-    } else {
-        console.log("tie !")
     }
 }
 
@@ -164,8 +161,8 @@ const enhanceAttractiveness = (ball1, ball2) => {
 const meet = (ball1, ball2, index1, index2) => {
 
     if (ball1.sex != ball2.sex) {
-        if (Math.abs(ball1.attractiveness - ball2.attractiveness) <= minAttractivenessNecessary) {
-            crossover(ball1, ball2) // naissance de deux enfants
+        if (Math.abs(ball1.attractiveness - ball2.attractiveness) <= minAttractivenessNecessary) { // ok mais je pense que là il faudrait utiliser tous les paramètres : attractivité, force et vitesse, pas juste l'attractivité. En gros vraaiment calculer un fitness à partir de tout ça | mais sinon ça marche
+            crossover(ball1, ball2)
             if (ball1.sex == "F") {
                 scene.remove(ball1.mesh)
                 spheres.splice(index1, 1)

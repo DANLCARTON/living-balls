@@ -57,13 +57,13 @@ const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
 
 // CLASS DEF
 class Ball {
-    constructor(pos, angle, state, mesh) {
+    constructor(pos, angle, mesh) {
         this.pos = pos;
         this.angle = angle;
-        this.state = state;
         this.mesh = mesh;
     }
 }
+
 // FUNCTION DEF
 const generateSpheres = (nb) => {
     let spheres = []
@@ -87,12 +87,11 @@ const generateSpheres = (nb) => {
 function moveSpheres() {
     for (let i = 0; i < spheres.length; i++) {
         const sphere = spheres[i];
-        const speed = 0.01; // Adjust the speed as needed
+        const speed = 0.01; 
         sphere.pos.x += Math.cos(sphere.angle) * speed;
         sphere.pos.z += Math.sin(sphere.angle) * speed;
 
-        // Add logic to handle boundaries if needed
-        // For example, if you want to keep the spheres within -5 and 5
+        // gestion des bords du plan
         if (sphere.pos.x < -5) sphere.pos.x = 5;
         if (sphere.pos.x > 5) sphere.pos.x = -5;
         if (sphere.pos.z < -5) sphere.pos.z = 5;
@@ -121,8 +120,7 @@ function checkCollisions() {
                 const sumRadii = sphereA.mesh.geometry.parameters.radius + sphereB.mesh.geometry.parameters.radius;
     
                 if (distance < sumRadii) {
-                    // sphereA.state = "collided"
-                    // sphereB.state = "collided"
+                    // code a executer quand deux spheres se rencontrent. 
                     scene.remove(sphereA.mesh)
                     scene.remove(sphereB.mesh)
                     spheres.splice(i, 1)
@@ -133,8 +131,7 @@ function checkCollisions() {
                     return spheres
                 } 
                 if (distance > sumRadii) {
-                    // sphereA.state = "none"
-                    // sphereB.state = "none"
+                    continue
                 }
             }
         }

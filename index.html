@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css" />
+    <title>Name</title>
+</head>
+
+<body>
+
+    <h1>[NAME]</h1>
+    <h2>Parameters</h2>
+    <form action="./sim.html" method="GET">
+        <h3>Start Population</h3>
+        <div class="form-input">
+            <label>Population : </label>
+            <input name="pop" type="range" min="0" max="30" step="1" value="5" oninput="this.nextElementSibling.value = this.value" />
+            <output>5</output>
+        </div>
+        <h3>Area</h3>
+        <div class="form-input">
+            <label>Area : </label>
+            <input name="area" type="range" min="0" max="100" step="1" value="10" oninput="this.nextElementSibling.value = this.value" />
+            <output>10</output>
+        </div>
+        <h3>Gender Distribution</h3><small>When a new one is born, what is it's probability to be a Cube? p(Shpere) = 1-p(Cube)</small>
+        <div class="form-input">
+            <label>Gender Distribution : </label>
+            <input name="sexDistrib" type="range" min="0" max="1" step="0.01" value="0.48" oninput="this.nextElementSibling.value = this.value" />
+            <output>10</output>
+        </div>
+        <h3>Minimum Attractiveness Necessary</h3><small>What is the maximum acceptable difference between the attractiveness stats of two individuals for them to mate?</small>
+        <div class="form-input">
+            <label>Minimum Attractiveness Necessary : </label>
+            <input name="man" type="range" min="0" max="2" step="0.1" value="0.4" oninput="this.nextElementSibling.value = this.value" />
+            <output>0.4</output>
+        </div>
+        <h3>Attractiveness Boost</h3><small>By how much an individual's attractiveness should rise when motivated?</small>
+        <div class="form-input">
+            <label>Attractiveness Boost : </label>
+            <input name="aBoost" type="range" min="0" max="0.05" step="0.001" value="0.001" oninput="this.nextElementSibling.value = this.value" />
+            <output>0.001</output>
+        </div>
+        <div class="form-input submit-button">
+            <input type="submit" value="GENERATE">
+        </div>
+    </form>
+
+</body>
+
+</html>

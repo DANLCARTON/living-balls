@@ -36,11 +36,26 @@ scene.add(camera)
 let globalBallId = 0;
 
 // PARAMS
-const startPopulation = 5
-const area = 10
-const sexDistrib = 0.48
-const minAttractivenessNecessary = 0.4
-const attractivenessBoost = 0.001
+const urlParams = new URLSearchParams(window.location.search)
+
+let URL_START_POPULATION = urlParams.get("pop")
+let URL_AREA = urlParams.get("area")
+let URL_SEX_DISTRIBUTION = urlParams.get("sexDistrib")
+let URL_MINIMUM_ATTRACTIVENESS_NECESSARY = urlParams.get("man")
+let URL_ATTRACTIVENESS_BOOST = urlParams.get("aBoost")
+
+
+const startPopulation = URL_START_POPULATION
+const area = URL_AREA
+const sexDistrib = URL_SEX_DISTRIBUTION
+const minAttractivenessNecessary = URL_MINIMUM_ATTRACTIVENESS_NECESSARY
+const attractivenessBoost = URL_ATTRACTIVENESS_BOOST
+
+
+
+
+
+
 
 
 
@@ -253,6 +268,7 @@ for (let i = 0; i < startPopulation; i++) {
 
 
 // ------------------------------------------------------------------------------------------------
+
 
 
 

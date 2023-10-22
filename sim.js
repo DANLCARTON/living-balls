@@ -81,16 +81,36 @@ const maleGeometry = new THREE.BoxGeometry(.4, .4, .4)
 const femaleGeometry = new THREE.SphereGeometry(.2, 8, 8)
 
 class NN {
+    // constructor(ni, w, no, nh, nhw) {
     constructor(ni, w, no) {
-        this.ni = ni
-        this.w = w
-        this.no = no
+        this.ni = ni // neurones entrée
+        this.w = w // poids neurones || a faire : des poids différents pour no0 et no1
+        // this.nh = [] // neurones cachés
+        // for (let i = 0; i < nh; i++) this.nh.push(0)
+        this.no = no // neurones sortie
+        // this.nhw = nhw
     }
-    sumFunc = () => {
+    // sumFuncNH = () => {
+    //     for (let i = 0; i < this.nh.length; i++) {
+    //         this.nh[i] = 0;
+    //         for (let j = 0; j < this.ni.length; j++) {
+    //             this.nh[i] += this.ni[j]*this.w[j]
+    //         }
+    //     }
+    // }
+    // sumFuncNO = () => {
+    //     for (let i = 0; i < this.no.length; i++) {
+    //         this.no[0] = 0;
+    //         for (let j = 0; j < this.nh.length; j++) {
+    //             this.no[i] += this.nh[j]*this.nhw[j]
+    //         }
+    //     }
+    // }
+    sumFuncNO = () => {
         for (let i = 0; i < this.no.length; i++) {
             this.no[i] = 0;
             for (let j = 0; j < this.ni.length; j++) {
-                this.no[i] += this.ni[j]*this.w[j]
+                this.no[j] += this.ni[j]*this.w[j]
             }
         }
     }
@@ -108,7 +128,13 @@ class Ball {
         this.attractiveness = attractiveness
         this.strength = strength
         this.speed = speed
-        this.nn = new NN([0, 0, 0], [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], [0, 0])
+        this.nn = new NN(
+            [0, 0, 0], // neurones d'entrée
+            [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], // poids des neurones d'entrée
+            [0, 0] // neurones de sortie
+            // 5, // nombre de neurones cachés
+            // [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1] // poids des neurones cachés
+        )
     }
     distance = (oBall) => {
         return this.pos.distanceTo(oBall.pos)
@@ -281,7 +307,8 @@ function checkCollisions() {
                 ball1.nn.ni[0] = ball1.distance(ball2)
                 ball1.nn.ni[1] = ball1.relativeSpeed(ball2)
                 ball1.nn.ni[2] = ball1.sexualityOf(ball2)
-                ball1.nn.sumFunc()
+                // ball1.nn.sumFuncNH()
+                ball1.nn.sumFuncNO()
 
                 // console.log("nn ni 0 (x1):", ball1.nn.ni[0])
                 // console.log("nn ni 1 (x2):", ball1.nn.ni[1])
@@ -289,6 +316,11 @@ function checkCollisions() {
                 // console.log("nn w 0 (w1):", ball1.nn.w[0])
                 // console.log("nn w 1 (w2):", ball1.nn.w[1])
                 // console.log("nn w 2 (w3):", ball1.nn.w[2])
+                // console.log("nn nh 0", ball1.nn.nh[0])
+                // console.log("nn nh 1", ball1.nn.nh[1])
+                // console.log("nn nh 2", ball1.nn.nh[2])
+                // console.log("nn nh 3", ball1.nn.nh[3])
+                // console.log("nn nh 4", ball1.nn.nh[4])
                 console.log("speed boost :", ball1.nn.no[0])
                 console.log("dir change :", ball1.nn.no[1])
 

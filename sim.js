@@ -80,7 +80,23 @@ const basicMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff })
 const maleGeometry = new THREE.BoxGeometry(.4, .4, .4)
 const femaleGeometry = new THREE.SphereGeometry(.2, 8, 8)
 
-// CLASS DEF
+class NN {
+    constructor(ni, w, no) {
+        this.ni = ni
+        this.w = w
+        this.no = no
+    }
+    sumFunc = () => {
+        for (let i = 0; i < this.no.length; i++) {
+            this.no[i] = 0;
+            for (let j = 0; j < this.ni.length; j++) {
+                this.no[i] += this.ni[j]*this.w[j]
+            }
+        }
+    }
+}
+
+// CLASS DEF66
 class Ball {
     constructor(pos, angle, mesh, sex, attractiveness, strength, speed) {
         this.id = globalBallId
@@ -92,7 +108,23 @@ class Ball {
         this.attractiveness = attractiveness
         this.strength = strength
         this.speed = speed
+        this.nn = new NN([0, 0, 0], [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], [0, 0])
     }
+    distance = (oBall) => {
+        return this.pos.distanceTo(oBall.pos)
+    }
+    relativeSpeed = (oBall) => {
+        let thisVelocity = new THREE.Vector2(Math.cos(this.angle), Math.sin(this.angle)).multiplyScalar(this.speed)
+        let oBallVelocity = new THREE.Vector2(Math.cos(oBall.angle), Math.sin(oBall.angle)).multiplyScalar(oBall.speed)
+        let relativeVelocity = thisVelocity.clone().sub(oBallVelocity)
+        let dotProduct = relativeVelocity.dot(this.pos.clone().sub(oBall.pos))
+        if (dotProduct < 0) return -relativeVelocity.length()
+        else return relativeVelocity.length()
+    }
+    sexualityOf = (oBall) => {
+        if (oBall.sex == "F") return 1
+        else if (oBall.sex == "M") return -1
+    } 
 }
 
 // FUNCTION DEF
@@ -246,6 +278,26 @@ function checkCollisions() {
                 const distance = ball1.pos.distanceTo(ball2.pos);
                 const sumRadii = ball1.mesh.geometry.parameters.radius + ball2.mesh.geometry.parameters.radius;
 
+                ball1.nn.ni[0] = ball1.distance(ball2)
+                ball1.nn.ni[1] = ball1.relativeSpeed(ball2)
+                ball1.nn.ni[2] = ball1.sexualityOf(ball2)
+                ball1.nn.sumFunc()
+
+                // console.log("nn ni 0 (x1):", ball1.nn.ni[0])
+                // console.log("nn ni 1 (x2):", ball1.nn.ni[1])
+                // console.log("nn ni 2 (x3):", ball1.nn.ni[2])
+                // console.log("nn w 0 (w1):", ball1.nn.w[0])
+                // console.log("nn w 1 (w2):", ball1.nn.w[1])
+                // console.log("nn w 2 (w3):", ball1.nn.w[2])
+                console.log("speed boost :", ball1.nn.no[0])
+                console.log("dir change :", ball1.nn.no[1])
+
+
+                if (ball1.speed > 0 && ball1.speed < 3) ball1.speed += ball1.nn.no[0]/1000;
+                ball1.angle += ball1.nn.no[1]/500
+                console.log("speed", ball1.speed)   
+
+
                 if (distance < sumRadii) {
                     meet(ball1, ball2, i, j)
                     return spheres
@@ -253,6 +305,7 @@ function checkCollisions() {
                 if (distance > sumRadii) {
                     continue
                 }
+
             }
         }
     }

@@ -85,32 +85,16 @@ class NN {
     constructor(ni, w, no) {
         this.ni = ni // neurones entrée
         this.w = w // poids neurones || a faire : des poids différents pour no0 et no1
-        // this.nh = [] // neurones cachés
-        // for (let i = 0; i < nh; i++) this.nh.push(0)
         this.no = no // neurones sortie
-        // this.nhw = nhw
     }
-    // sumFuncNH = () => {
-    //     for (let i = 0; i < this.nh.length; i++) {
-    //         this.nh[i] = 0;
-    //         for (let j = 0; j < this.ni.length; j++) {
-    //             this.nh[i] += this.ni[j]*this.w[j]
-    //         }
-    //     }
-    // }
-    // sumFuncNO = () => {
-    //     for (let i = 0; i < this.no.length; i++) {
-    //         this.no[0] = 0;
-    //         for (let j = 0; j < this.nh.length; j++) {
-    //             this.no[i] += this.nh[j]*this.nhw[j]
-    //         }
-    //     }
-    // }
     sumFuncNO = () => {
         for (let i = 0; i < this.no.length; i++) {
             this.no[i] = 0;
             for (let j = 0; j < this.ni.length; j++) {
-                this.no[j] += this.ni[j]*this.w[j]
+                for (let k = 0; k < this.w[j].length ; k++) {
+                    this.no[j] += this.ni[j]*this.w[j][k]
+                }
+                
             }
         }
     }
@@ -130,7 +114,9 @@ class Ball {
         this.speed = speed
         this.nn = new NN(
             [0, 0, 0], // neurones d'entrée
-            [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], // poids des neurones d'entrée
+            [[(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], 
+            [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1], 
+            [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1]], // poids des neurones d'entrée
             [0, 0] // neurones de sortie
             // 5, // nombre de neurones cachés
             // [(Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1, (Math.random()*2)-1] // poids des neurones cachés

@@ -65,7 +65,8 @@ const attractivenessBoost = URL_ATTRACTIVENESS_BOOST
 // ----------------------------------------------------------------
 
 // GLOBAL ELEMENTS DEF
-const plane = new THREE.PlaneGeometry(area, area)
+// const plane = new THREE.PlaneGeometry(area, area)
+const plane = new THREE.CircleGeometry(area, 32)
 const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x353535 })
 const ground = new THREE.Mesh(plane, groundMaterial)
 ground.receiveShadow = true;
@@ -262,11 +263,15 @@ function moveSpheres() {
         ball.pos.x += Math.cos(ball.angle) * speed;
         ball.pos.z += Math.sin(ball.angle) * speed;
 
-        // gestion des bords du plan
-        if (ball.pos.x < -area / 2) ball.pos.x = area / 2;
-        if (ball.pos.x > area / 2) ball.pos.x = -area / 2;
-        if (ball.pos.z < -area / 2) ball.pos.z = area / 2;
-        if (ball.pos.z > area / 2) ball.pos.z = -area / 2;
+        // // gestion des bords du plan
+        // if (ball.pos.x < -area / 2) ball.pos.x = area / 2;
+        // if (ball.pos.x > area / 2) ball.pos.x = -area / 2;
+        // if (ball.pos.z < -area / 2) ball.pos.z = area / 2;
+        // if (ball.pos.z > area / 2) ball.pos.z = -area / 2;
+
+        if (ball.pos.distanceTo(new THREE.Vector3(0, .2, 0)) > area) {
+            ball.angle -= Math.PI/4
+        }
 
         // Update the position of the mesh
         ball.mesh.position.copy(ball.pos);
